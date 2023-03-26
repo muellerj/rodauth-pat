@@ -1,3 +1,7 @@
+# frozen_string_literal: true
+
+$LOAD_PATH.unshift File.expand_path("../lib", __dir__)
+
 require "capybara"
 require "capybara/dsl"
 require "rspec"
@@ -20,15 +24,3 @@ class Base
   attr_writer :title
 end
 
-RSpec.configure do |config|
-
-  config.disable_monkey_patching!
-  config.warnings = true
-  if config.files_to_run.one?
-    config.default_formatter = "doc"
-  end
-
-  config.order = :random
-
-  Kernel.srand config.seed
-end
