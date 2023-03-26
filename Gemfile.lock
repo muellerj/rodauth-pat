@@ -16,6 +16,7 @@ GEM
       roda (>= 2.6.0)
       sequel (>= 4)
     sequel (5.66.0)
+    sqlite3 (1.6.1-x86_64-darwin)
 
 PLATFORMS
   x86_64-darwin-19
@@ -24,6 +25,7 @@ DEPENDENCIES
   minitest (~> 5.0)
   rake (~> 13.0)
   rodauth-pat!
+  sqlite3
 
 BUNDLED WITH
    2.3.26
