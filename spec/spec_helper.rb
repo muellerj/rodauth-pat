@@ -10,7 +10,6 @@ require "securerandom"
 require "rodauth/features/personal_access_tokens"
 
 DB = Sequel.connect("sqlite:/", identifier_mangling: false)
-DB.extension :freeze_datasets, :date_arithmetic
 Sequel.extension :migration
 Sequel::Migrator.run(DB, 'spec/migrate')
 DB.freeze
@@ -39,6 +38,12 @@ RSpec.configure do |config|
   config.warnings = false
   config.order = :random
   config.include BaseHelpers
+
+  config.around(:each) do |example|
+    DB.transaction(rollback: :always, auto_savepoint: true) do
+      example.run
+    end
+  end
 
   if config.files_to_run.one?
     config.default_formatter = "doc"

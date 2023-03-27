@@ -3,6 +3,13 @@ require_relative "spec_helper"
 RSpec.describe "Rodauth personal access token feature", type: :feature do
   let(:app) { base_app }
 
+  before do
+    DB[:personal_access_tokens].insert \
+      id: DB[:accounts].returning(:id).insert(email: "foo@example.com").first[:id],
+      key: "foobar",
+      expires_at: Time.now + 60 * 60 * 24 * 365
+  end
+
   it "ensures everything is wired up correctly" do
     app.route do |r|
       r.rodauth
