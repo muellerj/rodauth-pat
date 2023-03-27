@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require_relative "lib/rodauth/features/pat/version"
+require_relative "lib/rodauth/features/personal_access_tokens/version"
 
 Gem::Specification.new do |spec|
   spec.name = "rodauth-pat"
-  spec.version = Rodauth::Pat::VERSION
+  spec.version = Rodauth::PersonalAccessTokens::VERSION
   spec.authors = ["Jonas Mueller"]
   spec.email = ["jonas@tigger.cloud"]
 
