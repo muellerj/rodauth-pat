@@ -13,7 +13,8 @@ DB.extension :freeze_datasets, :date_arithmetic
 module BaseHelpers
   class Base < Roda
     plugin :flash
-    plugin :render, layout_opts: { path: 'spec/views/layout.str' }
+    plugin :sessions, secret: "foo-bar" * 20
+    plugin :render, layout_opts: { inline: "<%= yield %>" }
     plugin :not_found do
       raise "path #{request.path_info} not found"
     end
