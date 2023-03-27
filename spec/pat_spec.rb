@@ -14,6 +14,7 @@ RSpec.describe "Rodauth personal access token feature", type: :feature do
     visit "/public"
     expect(page).to have_content "i can see you"
     visit "/protected"
+    expect(page).not_to have_content "secret!"
     expect(page.current_path).to eq "/login"
   end
 end

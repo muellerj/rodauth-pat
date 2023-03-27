@@ -6,6 +6,7 @@ require "capybara/rspec"
 require "roda"
 require "sequel/core"
 require "rodauth/features/pat"
+require "securerandom"
 
 DB = Sequel.connect("sqlite:/", identifier_mangling: false)
 DB.extension :freeze_datasets, :date_arithmetic
@@ -13,7 +14,7 @@ DB.extension :freeze_datasets, :date_arithmetic
 module BaseHelpers
   class Base < Roda
     plugin :flash
-    plugin :sessions, secret: "foo-bar" * 20
+    plugin :sessions, secret: SecureRandom.random_bytes(64)
     plugin :render, layout_opts: { inline: "<%= yield %>" }
     plugin :not_found do
       raise "path #{request.path_info} not found"
