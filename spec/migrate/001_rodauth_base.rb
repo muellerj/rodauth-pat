@@ -10,6 +10,6 @@ Sequel.migration do
   end
 
   down do
-    drop_table(:accounts, :account_statuses)
+    drop_table(:accounts)
   end
 end

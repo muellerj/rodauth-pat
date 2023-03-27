@@ -24,7 +24,7 @@ module BaseHelpers
       raise "path #{request.path_info} not found"
     end
     plugin :rodauth do
-      enable :login, :logout
+      enable :login
     end
   end
 
