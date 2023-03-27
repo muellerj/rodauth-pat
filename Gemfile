@@ -7,4 +7,5 @@ gemspec
 gem "rake"
 
 gem "rspec"
+gem "capybara"
 gem "sqlite3"
