@@ -5,11 +5,15 @@ require "capybara/rspec"
 
 require "roda"
 require "sequel/core"
-require "rodauth/features/pat"
 require "securerandom"
+
+require "rodauth/features/personal_access_tokens"
 
 DB = Sequel.connect("sqlite:/", identifier_mangling: false)
 DB.extension :freeze_datasets, :date_arithmetic
+Sequel.extension :migration
+Sequel::Migrator.run(DB, 'spec/migrate')
+DB.freeze
 
 module BaseHelpers
   class Base < Roda

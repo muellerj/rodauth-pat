@@ -1,6 +1,6 @@
 require "rodauth"
 
-require_relative "pat/version"
+require_relative "personal_access_tokens/version"
 
 module Rodauth
 	Feature.define(:personal_access_tokens, :PersonalAccessTokens) do
@@ -23,8 +23,9 @@ module Rodauth
 			end
 		end
 
-		# define the default behavior for the auth_methods
-		# and auth_value_methods
-		# ...
+    def require_token_authentication
+      request.halt [ 401, {}, "Unauthorized" ]
+    end
+
 	end
 end
