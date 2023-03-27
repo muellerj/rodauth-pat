@@ -1,3 +1,5 @@
+ENV["RACK_ENV"] = "test"
+
 require "rspec"
 require "capybara/rspec"
 
@@ -8,16 +10,21 @@ require "rodauth/features/pat"
 DB = Sequel.connect("sqlite:/", identifier_mangling: false)
 DB.extension :freeze_datasets, :date_arithmetic
 
-class Base < Roda
-  plugin :flash
-  plugin :render, layout_opts: { path: 'spec/views/layout.str' }
-  plugin :not_found do
-    raise "path #{request.path_info} not found"
+module BaseHelpers
+  class Base < Roda
+    plugin :flash
+    plugin :render, layout_opts: { path: 'spec/views/layout.str' }
+    plugin :not_found do
+      raise "path #{request.path_info} not found"
+    end
+    plugin :rodauth do
+      enable :login, :logout
+    end
   end
-end
 
-def app
-  Base.tap { Capybara.app = _1 }
+  def base_app
+    Base.dup.tap { Capybara.app = _1 }
+  end
 end
 
 RSpec.configure do |config|
@@ -25,6 +32,7 @@ RSpec.configure do |config|
   config.disable_monkey_patching!
   config.warnings = true
   config.order = :random
+  config.include BaseHelpers
 
   if config.files_to_run.one?
     config.default_formatter = "doc"
@@ -32,5 +40,3 @@ RSpec.configure do |config|
 
   Kernel.srand config.seed
 end
-
-ENV['RACK_ENV'] = 'test'

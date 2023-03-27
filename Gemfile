@@ -8,4 +8,5 @@ gem "rake"
 
 gem "rspec"
 gem "capybara"
+gem "bcrypt"
 gem "sqlite3"

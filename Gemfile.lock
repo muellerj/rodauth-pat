@@ -9,6 +9,7 @@ GEM
   specs:
     addressable (2.8.1)
       public_suffix (>= 2.0.2, < 6.0)
+    bcrypt (3.1.18)
     capybara (3.38.0)
       addressable
       matrix
@@ -61,6 +62,7 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
+  bcrypt
   capybara
   rake
   rodauth-pat!
