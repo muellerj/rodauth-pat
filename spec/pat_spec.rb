@@ -13,6 +13,7 @@ RSpec.describe "Rodauth personal access token feature", type: :feature do
 
     visit "/public"
     expect(page).to have_content "i can see you"
+
     visit "/protected"
     expect(page).not_to have_content "secret!"
     expect(page.current_path).to eq "/login"
@@ -22,11 +23,13 @@ RSpec.describe "Rodauth personal access token feature", type: :feature do
     app.plugin :rodauth do
       enable :personal_access_tokens
     end
+
     app.route do |r|
       r.rodauth
       rodauth.require_token_authentication
       r.get("protected") { "secret!" }
     end
+
     visit "/protected"
     expect(page).not_to have_content "secret!"
     expect(page.status_code).to eq 401
