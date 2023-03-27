@@ -31,7 +31,12 @@ RSpec.describe "Rodauth personal access token feature", type: :feature do
     end
 
     visit "/protected"
-    expect(page).not_to have_content "secret!"
     expect(page.status_code).to eq 401
+    expect(page).not_to have_content "secret!"
+
+    page.driver.header "Authentication", "Bearer: foobar"
+    visit "/protected"
+    expect(page.status_code).to eq 200
+    expect(page).to have_content "secret!"
   end
 end

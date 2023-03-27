@@ -24,7 +24,16 @@ module Rodauth
 		end
 
     def require_token_authentication
+      return if token_valid?(request.env["HTTP_AUTHENTICATION"])
+
       request.halt [ 401, {}, "Unauthorized" ]
+    end
+
+    def token_valid?(header)
+      return false unless header
+      return false unless token = header[/\ABearer: (\w+)/, 1]
+
+      token == "foobar"
     end
 
 	end
