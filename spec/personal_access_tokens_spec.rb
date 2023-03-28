@@ -61,6 +61,9 @@ RSpec.describe "Rodauth personal access token feature", type: :feature do
       visit "/new-personal-access-token"
       login
       expect(page).to have_content "New Personal Access Token"
+      fill_in "Name", with: "Token A"
+      click_button "Create"
+      expect(page).to have_content "Success!"
     end
 
     it "allows access if there is a matching, non-expired, non-revoked token" do

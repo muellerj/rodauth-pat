@@ -34,7 +34,7 @@ module BaseHelpers
   end
 
   def login
-    fill_in "Login",    with: "foo@example.com"
+    fill_in "Login", with: "foo@example.com"
     fill_in "Password", with: "0123456789"
     click_button "Login"
   end
@@ -46,6 +46,10 @@ RSpec.configure do |config|
   config.warnings = false
   config.order = :random
   config.include BaseHelpers
+  config.backtrace_exclusion_patterns = [
+    /gems\//,
+    /spec\/spec_helper\.rb/,
+  ]
 
   config.around(:each) do |example|
     DB.transaction(rollback: :always, auto_savepoint: true) do

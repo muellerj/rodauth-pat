@@ -9,6 +9,7 @@ module Rodauth
     auth_value_method :personal_access_tokens_table_name, :personal_access_tokens
     auth_value_method :personal_access_token_name_param, :name
     auth_value_method :personal_access_tokens_id_column, :id
+    auth_value_method :personal_access_tokens_name_column, :name
     auth_value_method :personal_access_tokens_key_column, :key
     auth_value_method :personal_access_tokens_error_status, 401
     auth_value_method :personal_access_tokens_error_body, "Unauthorized"
@@ -45,11 +46,10 @@ module Rodauth
       end
 
       r.post do
-        token = random_token
-        insert_token(token)
-        token
-        set_notice_flash "New token: #{token[:key]}"
-        redirect device_path
+        key = random_key
+        insert_token(param(personal_access_token_name_param), key)
+        set_notice_flash "Success! New token: #{key}"
+        redirect personal_access_tokens_path
       end
     end
 
@@ -75,10 +75,11 @@ module Rodauth
       ]
     end
 
-    def insert_token(token)
+    def insert_token(name, key)
       DB[personal_access_tokens_table_name].insert \
         personal_access_tokens_id_column => account_from_session[personal_access_tokens_id_column],
-        personal_access_tokens_key_column => token,
+        personal_access_tokens_name_column => name,
+        personal_access_tokens_key_column => key,
         personal_access_tokens_expires_column => Time.now + personal_access_tokens_validity
     end
 
