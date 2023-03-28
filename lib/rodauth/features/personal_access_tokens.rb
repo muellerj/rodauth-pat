@@ -7,6 +7,7 @@ module Rodauth
     depends :base, :login
 
     auth_value_method :personal_access_tokens_table_name, :personal_access_tokens
+    auth_value_method :personal_access_token_name_param, :name
     auth_value_method :personal_access_tokens_id_column, :id
     auth_value_method :personal_access_tokens_key_column, :key
     auth_value_method :personal_access_tokens_error_status, 401
@@ -16,10 +17,16 @@ module Rodauth
     auth_value_method :personal_access_tokens_validity, (60 * 60 * 24 * 365)
     auth_value_method :personal_access_tokens_header_regexp, /\ABearer: (\w+)/
 
-    loaded_templates %w'personal_access_tokens'
-    view "personal_access_tokens", "Personal Access Tokens", "personal_access_tokens"
-    view "new_personal_access_token", "New Personal Access Token", "new_personal_access_token"
-    view "revoke_personal_access_token", "Revoke Personal Access Token", "revoke_personal_access_token"
+    loaded_templates %w'personal_access_tokens new_personal_access_token revoke_personal_access_token'
+    view "personal-access-tokens", "Personal Access Tokens", "personal_access_tokens"
+    view "new-personal-access-token", "New Personal Access Token", "new_personal_access_token"
+    view "revoke-personal-access-token", "Revoke Personal Access Token", "revoke_personal_access_token"
+
+    additional_form_tags
+    button "Create", "new_personal_access_token"
+    button "Revoke", "revoke_personal_access_token"
+    button "Back", "back_personal_access_tokens"
+    redirect
 
     route(:personal_access_tokens) do |r|
       require_account
@@ -27,6 +34,7 @@ module Rodauth
       r.get do
         personal_access_tokens_view
       end
+
     end
 
     route(:new_personal_access_token) do |r|
@@ -40,6 +48,8 @@ module Rodauth
         token = random_token
         insert_token(token)
         token
+        set_notice_flash "New token: #{token[:key]}"
+        redirect device_path
       end
     end
 

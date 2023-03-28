@@ -1,0 +1,12 @@
+New Personal Access Token
+
+<form method="post" class="rodauth" role="form" id="new-personal-access-token-form">
+  #{rodauth.personal_access_tokens_additional_form_tags}
+  #{rodauth.csrf_tag}
+	<div class="form-group mb-3">
+		<label for="name" class="form-label">Name</label>
+		#{rodauth.input_field_string(rodauth.personal_access_token_name_param, 'name', :type => 'text')}
+	</div>
+
+  #{rodauth.button(rodauth.new_personal_access_token_button)}
+</form>
