@@ -5,7 +5,7 @@ New Personal Access Token
   #{rodauth.csrf_tag}
 	<div class="form-group mb-3">
 		<label for="name" class="form-label">Name</label>
-		#{rodauth.input_field_string(rodauth.personal_access_token_name_param, 'name', :type => 'text')}
+		#{rodauth.input_field_string(rodauth.personal_access_token_name_param, 'name')}
 	</div>
 
   #{rodauth.button(rodauth.new_personal_access_token_button)}

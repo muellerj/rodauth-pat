@@ -7,7 +7,7 @@ module Rodauth
     depends :base, :login
 
     auth_value_method :personal_access_tokens_table_name, :personal_access_tokens
-    auth_value_method :personal_access_token_name_param, :name
+    auth_value_method :personal_access_token_name_param, "name"
     auth_value_method :personal_access_tokens_id_column, :id
     auth_value_method :personal_access_tokens_name_column, :name
     auth_value_method :personal_access_tokens_key_column, :key
@@ -47,8 +47,9 @@ module Rodauth
 
       r.post do
         key = random_key
-        insert_token(param(personal_access_token_name_param), key)
-        set_notice_flash "Success! New token: #{key}"
+        name = param(personal_access_token_name_param)
+        insert_token(name, key)
+        set_notice_flash "Success! New token (#{name}): #{key}"
         redirect personal_access_tokens_path
       end
     end
