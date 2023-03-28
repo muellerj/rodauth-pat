@@ -18,7 +18,11 @@ module BaseHelpers
   class Base < Roda
     plugin :flash
     plugin :sessions, secret: SecureRandom.random_bytes(64)
-    plugin :render, layout_opts: { inline: "<%= yield %>" }
+    plugin :render, layout_opts: { inline: <<~EOS }
+      <%= flash["notice"] %>
+      <%= flash["error"] %>
+      <%= yield %>
+    EOS
     plugin :not_found do
       raise "path #{request.path_info} not found"
     end
