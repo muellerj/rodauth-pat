@@ -48,17 +48,25 @@ RSpec.describe "Rodauth personal access token feature", type: :feature do
     it "allows viewing existing tokens" do
       DB[:personal_access_tokens].insert \
         id: user[:id],
+        name: "Token A",
         key: "foobar",
         expires_at: Time.now + 60 * 60 * 24 * 365
       visit "/personal-access-tokens"
       login
       expect(page).to have_content "My tokens"
-      expect(page).to have_content "foobar"
+      expect(page).to have_content "Token A"
     end
 
-    it "allows access if there is a matching, non-expired token" do
+    it "creating new tokens" do
+      visit "/new-personal-access-token"
+      login
+      expect(page).to have_content "New Personal Access Token"
+    end
+
+    it "allows access if there is a matching, non-expired, non-revoked token" do
       DB[:personal_access_tokens].insert \
         id: user[:id],
+        name: "Token A",
         key: "foobar",
         expires_at: Time.now + 60 * 60 * 24 * 365
 
@@ -71,8 +79,23 @@ RSpec.describe "Rodauth personal access token feature", type: :feature do
     it "disallows access for expired tokens" do
       DB[:personal_access_tokens].insert \
         id: user[:id],
+        name: "Token A",
         key: "foobar",
         expires_at: Time.now - 1
+
+      page.driver.header "Authentication", "Bearer: foobar"
+      visit "/protected"
+      expect(page.status_code).to eq 401
+      expect(page).not_to have_content "secret!"
+    end
+
+    it "disallows access for revoked tokens" do
+      DB[:personal_access_tokens].insert \
+        id: user[:id],
+        name: "Token A",
+        key: "foobar",
+        revoked_at: Time.now - 1,
+        expires_at: Time.now + 60 * 60 * 24 * 365
 
       page.driver.header "Authentication", "Bearer: foobar"
       visit "/protected"

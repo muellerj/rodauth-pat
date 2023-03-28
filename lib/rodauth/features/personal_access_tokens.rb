@@ -12,23 +12,46 @@ module Rodauth
     auth_value_method :personal_access_tokens_error_status, 401
     auth_value_method :personal_access_tokens_error_body, "Unauthorized"
     auth_value_method :personal_access_tokens_expires_column, :expires_at
+    auth_value_method :personal_access_tokens_revoked_column, :revoked_at
     auth_value_method :personal_access_tokens_validity, (60 * 60 * 24 * 365)
     auth_value_method :personal_access_tokens_header_regexp, /\ABearer: (\w+)/
 
     loaded_templates %w'personal_access_tokens'
-    view 'personal_access_tokens', 'Personal Access Tokens'
+    view "personal_access_tokens", "Personal Access Tokens", "personal_access_tokens"
+    view "new_personal_access_token", "New Personal Access Token", "new_personal_access_token"
+    view "revoke_personal_access_token", "Revoke Personal Access Token", "revoke_personal_access_token"
 
-    route do |r|
+    route(:personal_access_tokens) do |r|
       require_account
 
       r.get do
         personal_access_tokens_view
+      end
+    end
+
+    route(:new_personal_access_token) do |r|
+      require_account
+
+      r.get do
+        new_personal_access_token_view
       end
 
       r.post do
         token = random_token
         insert_token(token)
         token
+      end
+    end
+
+    route(:revoke_personal_access_token) do |r|
+      require_account
+
+      r.get do
+        revoke_personal_access_token_view
+      end
+
+      r.post do
+        # Revoke token and redirect
       end
     end
 
@@ -68,6 +91,7 @@ module Rodauth
 
       !!DB[personal_access_tokens_table_name]
         .where(Sequel::CURRENT_TIMESTAMP < personal_access_tokens_expires_column)
+        .where(personal_access_tokens_revoked_column => nil)
         .first(personal_access_tokens_key_column => key)
     end
 
