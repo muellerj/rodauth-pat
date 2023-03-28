@@ -1,0 +1,7 @@
+My tokens
+
+#{
+rodauth.account_personal_access_tokens.map do |token|
+  token.inspect 
+end.join("\n")
+}

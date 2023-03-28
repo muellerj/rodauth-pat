@@ -24,11 +24,19 @@ module BaseHelpers
     end
     plugin :rodauth do
       enable :login
+      account_password_hash_column :ph
+      login_return_to_requested_location? true
     end
   end
 
   def base_app
     Base.dup.tap { Capybara.app = _1 }
+  end
+
+  def login
+    fill_in "Login",    with: "foo@example.com"
+    fill_in "Password", with: "0123456789"
+    click_button "Login"
   end
 end
 
@@ -41,6 +49,8 @@ RSpec.configure do |config|
 
   config.around(:each) do |example|
     DB.transaction(rollback: :always, auto_savepoint: true) do
+      hsh = BCrypt::Password.create("0123456789", cost: BCrypt::Engine::MIN_COST)
+      DB[:accounts].insert(email: "foo@example.com", ph: hsh)
       example.run
     end
   end

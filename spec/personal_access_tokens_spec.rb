@@ -3,7 +3,7 @@ require_relative "spec_helper"
 RSpec.describe "Rodauth personal access token feature", type: :feature do
 
   let(:app) { base_app }
-  let(:user) { DB[:accounts].returning(:id).insert(email: "foo@example.com").first }
+  let(:user) { DB[:accounts].first(email: "foo@example.com") }
 
   describe "base setup" do
     it "ensures everything is wired up correctly" do
@@ -45,9 +45,15 @@ RSpec.describe "Rodauth personal access token feature", type: :feature do
       expect(page).not_to have_content "secret!"
     end
 
-    it "allows creating new tokens" do
+    it "allows viewing existing tokens" do
+      DB[:personal_access_tokens].insert \
+        id: user[:id],
+        key: "foobar",
+        expires_at: Time.now + 60 * 60 * 24 * 365
       visit "/personal-access-tokens"
-      expect(page).to have_content "my tokens"
+      login
+      expect(page).to have_content "My tokens"
+      expect(page).to have_content "foobar"
     end
 
     it "allows access if there is a matching, non-expired token" do
