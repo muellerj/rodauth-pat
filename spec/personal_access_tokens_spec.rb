@@ -57,6 +57,20 @@ RSpec.describe "Rodauth personal access token feature", type: :feature do
       expect(page).to have_content "Token A"
     end
 
+    it "allows expiring existing tokens" do
+      DB[:personal_access_tokens].insert \
+        id: user[:id],
+        name: "Token A",
+        key: "foobar",
+        expires_at: Time.now + 60 * 60 * 24 * 365
+      visit "/personal-access-tokens"
+      login
+      click_button "Revoke"
+      expect(page).to have_content "Success!"
+      expect(page).to have_content "Token A"
+      expect(page).to have_content "Revoked"
+    end
+
     it "creating new tokens" do
       visit "/new-personal-access-token"
       login
