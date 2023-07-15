@@ -2,6 +2,6 @@ My tokens
 
 #{
 rodauth.account_personal_access_tokens.map do |token|
-  token.inspect 
+  token.inspect + "<a href='#{rodauth.revoke_personal_access_token_path}'>Revoke</a>"
 end.join("\n")
 }

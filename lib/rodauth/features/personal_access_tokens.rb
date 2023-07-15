@@ -20,6 +20,7 @@ module Rodauth
 
     loaded_templates %w'personal_access_tokens new_personal_access_token revoke_personal_access_token'
     view "personal-access-tokens", "Personal Access Tokens", "personal_access_tokens"
+    view "personal-access-token", "Personal Access Token", "personal_access_token"
     view "new-personal-access-token", "New Personal Access Token", "new_personal_access_token"
     view "revoke-personal-access-token", "Revoke Personal Access Token", "revoke_personal_access_token"
 
@@ -36,6 +37,25 @@ module Rodauth
         personal_access_tokens_view
       end
 
+      r.on Integer do |id|
+        r.pass unless token = account_personal_access_tokens_ds.first(id: id)
+
+        r.get do
+          personal_access_token_view
+        end
+
+        r.is "revoke" do
+          r.get do
+            revoke_personal_access_token_view
+          end
+
+          r.post do
+            # Revoke token and redirect
+            set_notice_flash "Success! Token XXX revoked"
+            redirect personal_access_tokens_path
+          end
+        end
+      end
     end
 
     route(:new_personal_access_token) do |r|
@@ -51,18 +71,6 @@ module Rodauth
         insert_token(name, key)
         set_notice_flash "Success! New token (#{name}): #{key}"
         redirect personal_access_tokens_path
-      end
-    end
-
-    route(:revoke_personal_access_token) do |r|
-      require_account
-
-      r.get do
-        revoke_personal_access_token_view
-      end
-
-      r.post do
-        # Revoke token and redirect
       end
     end
 
@@ -91,10 +99,13 @@ module Rodauth
       path
     end
 
-    def account_personal_access_tokens
+    def account_personal_access_tokens_ds
       DB[personal_access_tokens_table_name]
         .where(personal_access_tokens_id_column => account_from_session[account_id_column])
-        .all
+    end
+
+    def account_personal_access_tokens
+      account_personal_access_tokens_ds.all
     end
 
     def token_valid?(header)

@@ -1,5 +1,7 @@
 require_relative "spec_helper"
 
+ONE_YEAR = 60 * 60 * 24 * 365
+
 RSpec.describe "Rodauth personal access token feature", type: :feature do
 
   let(:app) { base_app }
@@ -50,7 +52,7 @@ RSpec.describe "Rodauth personal access token feature", type: :feature do
         id: user[:id],
         name: "Token A",
         key: "foobar",
-        expires_at: Time.now + 60 * 60 * 24 * 365
+        expires_at: Time.now + ONE_YEAR
       visit "/personal-access-tokens"
       login
       expect(page).to have_content "My tokens"
@@ -62,9 +64,11 @@ RSpec.describe "Rodauth personal access token feature", type: :feature do
         id: user[:id],
         name: "Token A",
         key: "foobar",
-        expires_at: Time.now + 60 * 60 * 24 * 365
+        expires_at: Time.now + ONE_YEAR
       visit "/personal-access-tokens"
       login
+      click_link "Revoke"
+      expect(page).to have_content "Revoke Personal Access Token"
       click_button "Revoke"
       expect(page).to have_content "Success!"
       expect(page).to have_content "Token A"
@@ -86,7 +90,7 @@ RSpec.describe "Rodauth personal access token feature", type: :feature do
         id: user[:id],
         name: "Token A",
         key: "foobar",
-        expires_at: Time.now + 60 * 60 * 24 * 365
+        expires_at: Time.now + ONE_YEAR
 
       page.driver.header "Authentication", "Bearer: foobar"
       visit "/protected"
@@ -113,7 +117,7 @@ RSpec.describe "Rodauth personal access token feature", type: :feature do
         name: "Token A",
         key: "foobar",
         revoked_at: Time.now - 1,
-        expires_at: Time.now + 60 * 60 * 24 * 365
+        expires_at: Time.now + ONE_YEAR
 
       page.driver.header "Authentication", "Bearer: foobar"
       visit "/protected"
