@@ -34,6 +34,8 @@ RSpec.describe "Rodauth personal access token feature", type: :feature do
 
       app.route do |r|
         r.rodauth
+        rodauth.load_personal_access_token_routes
+
         r.get("protected") do
           rodauth.require_token_authentication
           "secret!"
@@ -55,7 +57,7 @@ RSpec.describe "Rodauth personal access token feature", type: :feature do
         expires_at: Time.now + ONE_YEAR
       visit "/personal-access-tokens"
       login
-      expect(page).to have_content "My tokens"
+      expect(page).to have_content "My Personal Access Tokens"
       expect(page).to have_content "Token A"
     end
 
@@ -71,12 +73,11 @@ RSpec.describe "Rodauth personal access token feature", type: :feature do
       expect(page).to have_content "Revoke Personal Access Token"
       click_button "Revoke"
       expect(page).to have_content "Success!"
-      expect(page).to have_content "Token A"
-      expect(page).to have_content "Revoked"
+      expect(page).to have_content "Token A revoked"
     end
 
-    it "creating new tokens" do
-      visit "/new-personal-access-token"
+    it "allows creating new tokens" do
+      visit "/personal-access-tokens/new"
       login
       expect(page).to have_content "New Personal Access Token"
       fill_in "Name", with: "Token A"

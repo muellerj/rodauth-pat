@@ -26,6 +26,11 @@ module BaseHelpers
     plugin :not_found do
       raise "path #{request.path_info} not found"
     end
+    plugin :route_csrf do
+      puts "--- ERROR ---"
+      puts request.params.inspect
+      halt 500
+    end
     plugin :rodauth do
       enable :login
       account_password_hash_column :ph

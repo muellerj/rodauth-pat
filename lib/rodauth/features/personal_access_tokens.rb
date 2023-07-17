@@ -1,4 +1,5 @@
 require "rodauth"
+require "digest"
 
 require_relative "personal_access_tokens/version"
 
@@ -12,17 +13,24 @@ module Rodauth
     auth_value_method :personal_access_tokens_name_column, :name
     auth_value_method :personal_access_tokens_key_column, :key
     auth_value_method :personal_access_tokens_error_status, 401
+    auth_value_method :personal_access_tokens_route, "personal-access-tokens"
+    auth_value_method :personal_access_tokens_revoke_route, "revoke"
+    auth_value_method :personal_access_tokens_new_route, "new"
     auth_value_method :personal_access_tokens_error_body, "Unauthorized"
     auth_value_method :personal_access_tokens_expires_column, :expires_at
     auth_value_method :personal_access_tokens_revoked_column, :revoked_at
     auth_value_method :personal_access_tokens_validity, (60 * 60 * 24 * 365)
     auth_value_method :personal_access_tokens_header_regexp, /\ABearer: (\w+)/
 
-    loaded_templates %w'personal_access_tokens new_personal_access_token revoke_personal_access_token'
+    loaded_templates %w(
+      personal_access_tokens
+      new_personal_access_token
+      revoke_personal_access_token
+    )
+
     view "personal-access-tokens", "Personal Access Tokens", "personal_access_tokens"
-    view "personal-access-token", "Personal Access Token", "personal_access_token"
-    view "new-personal-access-token", "New Personal Access Token", "new_personal_access_token"
     view "revoke-personal-access-token", "Revoke Personal Access Token", "revoke_personal_access_token"
+    view "new-personal-access-token", "New Personal Access Token", "new_personal_access_token"
 
     additional_form_tags
     button "Create", "new_personal_access_token"
@@ -30,47 +38,60 @@ module Rodauth
     button "Back", "back_personal_access_tokens"
     redirect
 
-    route(:personal_access_tokens) do |r|
-      require_account
+    def personal_access_tokens_path
+      route_path(personal_access_tokens_route)
+    end
 
-      r.get do
-        personal_access_tokens_view
-      end
+    def revoke_personal_access_token_path(id)
+      "#{personal_access_tokens_path}/#{id}/#{personal_access_tokens_revoke_route}"
+    end
 
-      r.on Integer do |id|
-        r.pass unless token = account_personal_access_tokens_ds.first(id: id)
+    def new_personal_access_token_path
+      "#{personal_access_tokens_path}/#{personal_access_tokens_new_route}"
+    end
 
-        r.get do
-          personal_access_token_view
+    def load_personal_access_token_routes
+      request.on(personal_access_tokens_route) do
+        check_csrf if check_csrf?
+        require_account
+
+        request.is(true) do
+          personal_access_tokens_view
         end
 
-        r.is "revoke" do
-          r.get do
-            revoke_personal_access_token_view
+        request.is(personal_access_tokens_new_route) do
+          request.get do
+            new_personal_access_token_view
           end
 
-          r.post do
-            # Revoke token and redirect
-            set_notice_flash "Success! Token XXX revoked"
+          request.post do
+            key = random_key
+            name = param(personal_access_token_name_param)
+            insert_token(name, key)
+            set_notice_flash "Success! New token (#{name}): #{key}"
             redirect personal_access_tokens_path
           end
         end
-      end
-    end
 
-    route(:new_personal_access_token) do |r|
-      require_account
+        request.on Integer do |id|
+          request.pass unless token = account_personal_access_tokens_ds.first(id: id)
 
-      r.get do
-        new_personal_access_token_view
-      end
+          scope.instance_variable_set(:@token, token)
 
-      r.post do
-        key = random_key
-        name = param(personal_access_token_name_param)
-        insert_token(name, key)
-        set_notice_flash "Success! New token (#{name}): #{key}"
-        redirect personal_access_tokens_path
+          request.is(personal_access_tokens_revoke_route) do
+            request.get do
+              revoke_personal_access_token_view
+            end
+
+            request.post do
+              account_personal_access_tokens_ds
+                .where(id: id)
+                .update(revoked_at: Time.now)
+              set_notice_flash "Success! Token #{token[:name]} revoked"
+              redirect personal_access_tokens_path
+            end
+          end
+        end
       end
     end
 
@@ -105,7 +126,9 @@ module Rodauth
     end
 
     def account_personal_access_tokens
-      account_personal_access_tokens_ds.all
+      account_personal_access_tokens_ds
+        .where(personal_access_tokens_revoked_column => nil)
+        .all
     end
 
     def token_valid?(header)
