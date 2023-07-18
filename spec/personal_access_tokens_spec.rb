@@ -51,7 +51,7 @@ RSpec.describe "Rodauth personal access token feature", type: :feature do
 
     it "allows viewing existing tokens" do
       DB[:personal_access_tokens].insert \
-        id: user[:id],
+        account_id: user[:id],
         name: "Token A",
         digest: digest_for("foobar"),
         expires_at: Time.now + ONE_YEAR
@@ -61,9 +61,9 @@ RSpec.describe "Rodauth personal access token feature", type: :feature do
       expect(page).to have_content "Token A"
     end
 
-    it "allows expiring existing tokens" do
+    it "allows revoking existing tokens" do
       DB[:personal_access_tokens].insert \
-        id: user[:id],
+        account_id: user[:id],
         name: "Token A",
         digest: digest_for("foobar"),
         expires_at: Time.now + ONE_YEAR
@@ -88,7 +88,7 @@ RSpec.describe "Rodauth personal access token feature", type: :feature do
 
     it "allows access if there is a matching, non-expired, non-revoked token" do
       DB[:personal_access_tokens].insert \
-        id: user[:id],
+        account_id: user[:id],
         name: "Token A",
         digest: digest_for("foobar"),
         expires_at: Time.now + ONE_YEAR
@@ -101,7 +101,7 @@ RSpec.describe "Rodauth personal access token feature", type: :feature do
 
     it "disallows access for expired tokens" do
       DB[:personal_access_tokens].insert \
-        id: user[:id],
+        account_id: user[:id],
         name: "Token A",
         digest: digest_for("foobar"),
         expires_at: Time.now - 1
@@ -114,7 +114,7 @@ RSpec.describe "Rodauth personal access token feature", type: :feature do
 
     it "disallows access for revoked tokens" do
       DB[:personal_access_tokens].insert \
-        id: user[:id],
+        account_id: user[:id],
         name: "Token A",
         digest: digest_for("foobar"),
         revoked_at: Time.now - 1,

@@ -8,7 +8,7 @@ module Rodauth
 
     auth_value_method :personal_access_tokens_table_name, :personal_access_tokens
     auth_value_method :personal_access_token_name_param, "name"
-    auth_value_method :personal_access_tokens_id_column, :id
+    auth_value_method :personal_access_tokens_account_id_column, :account_id
     auth_value_method :personal_access_tokens_name_column, :name
     auth_value_method :personal_access_tokens_digest_column, :digest
     auth_value_method :personal_access_tokens_error_status, 401
@@ -106,7 +106,7 @@ module Rodauth
 
     def insert_token(name, key)
       DB[personal_access_tokens_table_name].insert \
-        personal_access_tokens_id_column => account_from_session[personal_access_tokens_id_column],
+        personal_access_tokens_account_id_column => account_from_session[account_id_column],
         personal_access_tokens_name_column => name,
         personal_access_tokens_digest_column => digest_for(key),
         personal_access_tokens_expires_column => Time.now + personal_access_tokens_validity
@@ -121,7 +121,7 @@ module Rodauth
 
     def account_personal_access_tokens_ds
       DB[personal_access_tokens_table_name]
-        .where(personal_access_tokens_id_column => account_from_session[account_id_column])
+        .where(personal_access_tokens_account_id_column => account_from_session[account_id_column])
     end
 
     def create_key
