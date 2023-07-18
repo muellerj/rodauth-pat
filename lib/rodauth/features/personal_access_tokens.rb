@@ -1,5 +1,4 @@
 require "rodauth"
-require "digest"
 
 require_relative "personal_access_tokens/version"
 
@@ -11,7 +10,7 @@ module Rodauth
     auth_value_method :personal_access_token_name_param, "name"
     auth_value_method :personal_access_tokens_id_column, :id
     auth_value_method :personal_access_tokens_name_column, :name
-    auth_value_method :personal_access_tokens_key_column, :key
+    auth_value_method :personal_access_tokens_digest_column, :digest
     auth_value_method :personal_access_tokens_error_status, 401
     auth_value_method :personal_access_tokens_route, "personal-access-tokens"
     auth_value_method :personal_access_tokens_revoke_route, "revoke"
@@ -109,7 +108,7 @@ module Rodauth
       DB[personal_access_tokens_table_name].insert \
         personal_access_tokens_id_column => account_from_session[personal_access_tokens_id_column],
         personal_access_tokens_name_column => name,
-        personal_access_tokens_key_column => key,
+        personal_access_tokens_digest_column => digest_for(key),
         personal_access_tokens_expires_column => Time.now + personal_access_tokens_validity
     end
 
@@ -125,6 +124,10 @@ module Rodauth
         .where(personal_access_tokens_id_column => account_from_session[account_id_column])
     end
 
+    def digest_for(key)
+      OpenSSL::HMAC.digest(OpenSSL::Digest::SHA256.new, hmac_secret, key)
+    end
+
     def account_personal_access_tokens
       account_personal_access_tokens_ds
         .where(personal_access_tokens_revoked_column => nil)
@@ -138,7 +141,7 @@ module Rodauth
       !!DB[personal_access_tokens_table_name]
         .where(Sequel::CURRENT_TIMESTAMP < personal_access_tokens_expires_column)
         .where(personal_access_tokens_revoked_column => nil)
-        .first(personal_access_tokens_key_column => key)
+        .first(personal_access_tokens_digest_column => digest_for(key))
     end
 
   end

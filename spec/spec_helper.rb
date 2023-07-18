@@ -15,9 +15,12 @@ Sequel::Migrator.run(DB, 'spec/migrate')
 DB.freeze
 
 module BaseHelpers
+
+  SECRET = SecureRandom.base64(64)
+
   class Base < Roda
     plugin :flash
-    plugin :sessions, secret: SecureRandom.random_bytes(64)
+    plugin :sessions, secret: SECRET
     plugin :render, layout_opts: { inline: <<~EOS }
       <%= flash["notice"] %>
       <%= flash["error"] %>
@@ -26,15 +29,11 @@ module BaseHelpers
     plugin :not_found do
       raise "path #{request.path_info} not found"
     end
-    plugin :route_csrf do
-      puts "--- ERROR ---"
-      puts request.params.inspect
-      halt 500
-    end
     plugin :rodauth do
       enable :login
       account_password_hash_column :ph
       login_return_to_requested_location? true
+      hmac_secret SECRET
     end
   end
 
@@ -46,6 +45,10 @@ module BaseHelpers
     fill_in "Login", with: "foo@example.com"
     fill_in "Password", with: "0123456789"
     click_button "Login"
+  end
+
+  def digest_for(key)
+    OpenSSL::HMAC.digest(OpenSSL::Digest::SHA256.new, SECRET, key)
   end
 end
 

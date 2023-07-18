@@ -53,7 +53,7 @@ RSpec.describe "Rodauth personal access token feature", type: :feature do
       DB[:personal_access_tokens].insert \
         id: user[:id],
         name: "Token A",
-        key: "foobar",
+        digest: digest_for("foobar"),
         expires_at: Time.now + ONE_YEAR
       visit "/personal-access-tokens"
       login
@@ -65,7 +65,7 @@ RSpec.describe "Rodauth personal access token feature", type: :feature do
       DB[:personal_access_tokens].insert \
         id: user[:id],
         name: "Token A",
-        key: "foobar",
+        digest: digest_for("foobar"),
         expires_at: Time.now + ONE_YEAR
       visit "/personal-access-tokens"
       login
@@ -90,7 +90,7 @@ RSpec.describe "Rodauth personal access token feature", type: :feature do
       DB[:personal_access_tokens].insert \
         id: user[:id],
         name: "Token A",
-        key: "foobar",
+        digest: digest_for("foobar"),
         expires_at: Time.now + ONE_YEAR
 
       page.driver.header "Authentication", "Bearer: foobar"
@@ -103,7 +103,7 @@ RSpec.describe "Rodauth personal access token feature", type: :feature do
       DB[:personal_access_tokens].insert \
         id: user[:id],
         name: "Token A",
-        key: "foobar",
+        digest: digest_for("foobar"),
         expires_at: Time.now - 1
 
       page.driver.header "Authentication", "Bearer: foobar"
@@ -116,7 +116,7 @@ RSpec.describe "Rodauth personal access token feature", type: :feature do
       DB[:personal_access_tokens].insert \
         id: user[:id],
         name: "Token A",
-        key: "foobar",
+        digest: digest_for("foobar"),
         revoked_at: Time.now - 1,
         expires_at: Time.now + ONE_YEAR
 
