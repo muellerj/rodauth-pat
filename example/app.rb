@@ -15,9 +15,11 @@ hash = BCrypt::Password.create("password", cost: BCrypt::Engine::MIN_COST)
 DB[:accounts].insert_conflict(target: :email).insert(email: "foo@bar.com", ph: hash)
 
 class PersonalAccessTokenApp < Roda
+  SECRET = SecureRandom.base64(64)
+
   plugin :flash
   plugin :common_logger
-  plugin :sessions, secret: SecureRandom.random_bytes(64)
+  plugin :sessions, secret: SECRET
   plugin :render, layout_opts: { inline: <<~EOS }
     <%= flash["notice"] %>
     <%= flash["error"] %>
@@ -30,6 +32,7 @@ class PersonalAccessTokenApp < Roda
     enable :personal_access_tokens
     account_password_hash_column :ph
     login_return_to_requested_location? true
+    hmac_secret SECRET
   end
 
   plugin :not_found do

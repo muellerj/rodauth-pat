@@ -64,7 +64,7 @@ module Rodauth
           end
 
           request.post do
-            key = random_key
+            key = create_key
             name = param(personal_access_token_name_param)
             insert_token(name, key)
             set_notice_flash "Success! New token (#{name}): #{key}"
@@ -122,6 +122,10 @@ module Rodauth
     def account_personal_access_tokens_ds
       DB[personal_access_tokens_table_name]
         .where(personal_access_tokens_id_column => account_from_session[account_id_column])
+    end
+
+    def create_key
+      SecureRandom.alphanumeric(20)
     end
 
     def digest_for(key)
