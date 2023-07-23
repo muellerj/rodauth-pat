@@ -8,6 +8,6 @@
 		#{rodauth.input_field_string(rodauth.personal_access_token_name_param, 'name')}
 	</div>
 
-  #{rodauth.button(rodauth.back_personal_access_tokens_button)}
+  <a href="#{rodauth.personal_access_tokens_path}">Back</a>
   #{rodauth.button(rodauth.new_personal_access_token_button)}
 </form>

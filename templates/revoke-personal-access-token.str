@@ -9,6 +9,6 @@
   #{rodauth.personal_access_tokens_additional_form_tags}
   #{rodauth.csrf_tag}
 
-  #{rodauth.button(rodauth.back_personal_access_tokens_button)}
+  <a href="#{rodauth.personal_access_tokens_path}">Back</a>
   #{rodauth.button(rodauth.revoke_personal_access_token_button)}
 </form>

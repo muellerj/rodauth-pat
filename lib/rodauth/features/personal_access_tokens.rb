@@ -34,7 +34,6 @@ module Rodauth
     additional_form_tags
     button "Create", "new_personal_access_token"
     button "Revoke", "revoke_personal_access_token"
-    button "Back", "back_personal_access_tokens"
     redirect
 
     def personal_access_tokens_path
@@ -73,7 +72,7 @@ module Rodauth
         end
 
         request.on Integer do |id|
-          request.pass unless token = account_personal_access_tokens_ds.first(id: id)
+          next unless token = account_personal_access_tokens_ds.first(id: id)
 
           scope.instance_variable_set(:@token, token)
 
