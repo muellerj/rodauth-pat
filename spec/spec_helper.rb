@@ -14,6 +14,8 @@ Sequel.extension :migration
 Sequel::Migrator.run(DB, 'spec/migrate')
 DB.freeze
 
+ONE_YEAR = 60 * 60 * 24 * 365
+
 module BaseHelpers
 
   SECRET = SecureRandom.base64(64)
@@ -47,8 +49,22 @@ module BaseHelpers
     click_button "Login"
   end
 
-  def digest_for(key)
+  def insert_token(name:, user:, key: "foobar", expires_at: nil, revoked_at: nil)
+    DB[:personal_access_tokens].insert \
+      account_id: user[:id],
+      name: name,
+      digest: compute_hmac(key),
+      expires_at: expires_at || Time.new + ONE_YEAR,
+      revoked_at: revoked_at
+  end
+
+  def compute_hmac(key)
+    # TODO: Tap into base_app.rodauth to use #compute_hmac
     OpenSSL::HMAC.digest(OpenSSL::Digest::SHA256.new, SECRET, key)
+      .then { [_1] }
+      .pack('m')
+      .chomp!("=\n")
+      .tr!('+/', '-_')
   end
 end
 

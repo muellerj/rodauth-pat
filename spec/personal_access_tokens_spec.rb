@@ -1,7 +1,5 @@
 require_relative "spec_helper"
 
-ONE_YEAR = 60 * 60 * 24 * 365
-
 RSpec.describe "Rodauth personal access token feature", type: :feature do
 
   let(:app) { base_app }
@@ -50,23 +48,17 @@ RSpec.describe "Rodauth personal access token feature", type: :feature do
     end
 
     it "allows viewing existing tokens" do
-      DB[:personal_access_tokens].insert \
-        account_id: user[:id],
-        name: "Token A",
-        digest: digest_for("foobar"),
-        expires_at: Time.now + ONE_YEAR
+      insert_token user: user, name: "Token A"
+      insert_token user: user, name: "Token B"
       visit "/personal-access-tokens"
       login
       expect(page).to have_content "My Personal Access Tokens"
       expect(page).to have_content "Token A"
+      expect(page).to have_content "Token B"
     end
 
     it "allows revoking existing tokens" do
-      DB[:personal_access_tokens].insert \
-        account_id: user[:id],
-        name: "Token A",
-        digest: digest_for("foobar"),
-        expires_at: Time.now + ONE_YEAR
+      insert_token user: user, name: "Token A"
       visit "/personal-access-tokens"
       login
       click_link "Revoke"
@@ -87,12 +79,7 @@ RSpec.describe "Rodauth personal access token feature", type: :feature do
     end
 
     it "allows access if there is a matching, non-expired, non-revoked token" do
-      DB[:personal_access_tokens].insert \
-        account_id: user[:id],
-        name: "Token A",
-        digest: digest_for("foobar"),
-        expires_at: Time.now + ONE_YEAR
-
+      insert_token user: user, name: "Token A", key: "foobar"
       page.driver.header "Authentication", "Bearer: foobar"
       visit "/protected"
       expect(page.status_code).to eq 200
@@ -100,12 +87,7 @@ RSpec.describe "Rodauth personal access token feature", type: :feature do
     end
 
     it "disallows access for expired tokens" do
-      DB[:personal_access_tokens].insert \
-        account_id: user[:id],
-        name: "Token A",
-        digest: digest_for("foobar"),
-        expires_at: Time.now - 1
-
+      insert_token user: user, name: "Token A", key: "foobar", expires_at: Time.now - 1
       page.driver.header "Authentication", "Bearer: foobar"
       visit "/protected"
       expect(page.status_code).to eq 401
@@ -113,13 +95,7 @@ RSpec.describe "Rodauth personal access token feature", type: :feature do
     end
 
     it "disallows access for revoked tokens" do
-      DB[:personal_access_tokens].insert \
-        account_id: user[:id],
-        name: "Token A",
-        digest: digest_for("foobar"),
-        revoked_at: Time.now - 1,
-        expires_at: Time.now + ONE_YEAR
-
+      insert_token user: user, name: "Token A", key: "foobar", revoked_at: Time.now - 1
       page.driver.header "Authentication", "Bearer: foobar"
       visit "/protected"
       expect(page.status_code).to eq 401

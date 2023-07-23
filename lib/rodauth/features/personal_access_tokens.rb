@@ -108,7 +108,7 @@ module Rodauth
       DB[personal_access_tokens_table_name].insert \
         personal_access_tokens_account_id_column => account_from_session[account_id_column],
         personal_access_tokens_name_column => name,
-        personal_access_tokens_digest_column => digest_for(key),
+        personal_access_tokens_digest_column => compute_hmac(key),
         personal_access_tokens_expires_column => Time.now + personal_access_tokens_validity
     end
 
@@ -128,10 +128,6 @@ module Rodauth
       SecureRandom.alphanumeric(20)
     end
 
-    def digest_for(key)
-      OpenSSL::HMAC.digest(OpenSSL::Digest::SHA256.new, hmac_secret, key)
-    end
-
     def account_personal_access_tokens
       account_personal_access_tokens_ds
         .where(personal_access_tokens_revoked_column => nil)
@@ -145,7 +141,7 @@ module Rodauth
       !!DB[personal_access_tokens_table_name]
         .where(Sequel::CURRENT_TIMESTAMP < personal_access_tokens_expires_column)
         .where(personal_access_tokens_revoked_column => nil)
-        .first(personal_access_tokens_digest_column => digest_for(key))
+        .first(personal_access_tokens_digest_column => compute_hmac(key))
     end
 
   end
