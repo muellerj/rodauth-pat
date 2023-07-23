@@ -33,6 +33,7 @@ module BaseHelpers
     end
     plugin :rodauth do
       enable :login
+      enable :internal_request
       account_password_hash_column :ph
       login_return_to_requested_location? true
       hmac_secret SECRET
@@ -59,12 +60,7 @@ module BaseHelpers
   end
 
   def compute_hmac(key)
-    # TODO: Tap into base_app.rodauth to use #compute_hmac
-    OpenSSL::HMAC.digest(OpenSSL::Digest::SHA256.new, SECRET, key)
-      .then { [_1] }
-      .pack('m')
-      .chomp!("=\n")
-      .tr!('+/', '-_')
+    app.rodauth.internal_request_eval { compute_hmac(key) }
   end
 end
 
