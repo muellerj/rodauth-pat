@@ -37,27 +37,26 @@ end
 route do |r|
   r.rodauth
 
-	# This will setup 3 routes for management of the Personal Access Tokens:
+  # This will setup 3 routes for management of the Personal Access Tokens:
   # There are not strictly required for operation of #require_token_authentication
-	#
+  #
   #   * /personal-access-tokens             Show non-revoked tokens
   #   * /personal_access_tokens/:id/revoke  Revoke existing tokens
   #   * /personal_access_tokens/new         Create new tokens
+  rodauth.load_personal_access_token_routes
 
-	rodauth.load_personal_access_token_routes
+  r.get "public" do
+    "public!"
+  end
 
-	r.get "public" do
-		"public!"
-	end
+  r.get "protected" do
+    rodauth.require_authentication
+    "secret!"
+  end
 
-	r.get "protected" do
-		rodauth.require_authentication
-		"secret!"
-	end
-
-	r.get "api" do
-		rodauth.require_token_authentication
-		"secret with api!"
-	end
+  r.get "api" do
+    rodauth.require_token_authentication
+    "secret with api!"
+  end
 end
 ```
